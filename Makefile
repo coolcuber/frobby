@@ -152,6 +152,12 @@ objs    = $(patsubst %.cpp, $(outdir)%.o, $(rawSources))
 
 RANLIB = ranlib
 
+internalNameFlag=-soname
+OS=$(shell uname -s)
+ifeq ($(OS), Darwin)
+  internalNameFlag=-install_name
+endif
+
 # ***** Compilation
 
 .PHONY: all depend clean bin/$(program) test library distribution clear fixspace
@@ -234,7 +240,7 @@ library: bin/$(library)
 bin/$(library): $(objs) | bin/
 	rm -f bin/$(library)
 ifeq ($(MODE), shared)
-	$(CXX) -shared -Wl,-soname,$(library).$(FROBBY_SOVERSION) \
+	$(CXX) -shared -Wl,$(internalNameFlag),$(library).$(FROBBY_SOVERSION) \
 	-o bin/$(library).$(FROBBY_VERSION) $(ldflags) \
 	  $(patsubst $(outdir)main.o,,$(objs)) -lgmp -lgmpxx
 else
